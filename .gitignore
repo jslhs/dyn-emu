@@ -33,3 +33,5 @@ build-msvc
 bin
 lib
 
+.swp
+
