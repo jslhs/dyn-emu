@@ -12,6 +12,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
+#include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/TargetSelect.h"
@@ -26,23 +27,19 @@ using namespace llvm;
 
 int main() {
   InitializeNativeTarget();
-  LLVMInitializeX86TargetInfo();
-  LLVMInitializeX86Target();
-  LLVMInitializeX86TargetMC();
   LLVMInitializeNativeAsmPrinter();
   LLVMInitializeNativeAsmParser();
 
   LLVMContext Context;
   std::unique_ptr<Module> Owner = make_unique<Module>("main", Context);
   Module *M = Owner.get();
-
   // Create the add1 function entry and insert this entry into module M.  The
   // function will have a return type of "int" and take an argument of "int".
   // The '0' terminates the list of argument types.
   Function *Add1F =
-    cast<Function>(M->getOrInsertFunction("add1", Type::getInt32Ty(Context),
-                                          Type::getInt32Ty(Context),
-                                          nullptr));
+	  cast<Function>(M->getOrInsertFunction("add1", Type::getInt32Ty(Context),
+	  Type::getInt32Ty(Context),
+	  nullptr));
 
   // Add a basic block to the function. As before, it automatically inserts
   // because of the last argument.
@@ -70,9 +67,10 @@ int main() {
 
   // Now we're going to create function `foo', which returns an int and takes no
   // arguments.
+  
   Function *FooF =
-    cast<Function>(M->getOrInsertFunction("foo", Type::getInt32Ty(Context),
-                                          nullptr));
+	  cast<Function>(M->getOrInsertFunction("foo", Type::getInt32Ty(Context),
+	  nullptr));
 
   // Add a basic block to the FooF function.
   BB = BasicBlock::Create(Context, "EntryBlock", FooF);
@@ -90,7 +88,6 @@ int main() {
   // Create the return instruction and add it to the basic block.
   builder.CreateRet(Add1CallRes);
 
-
   std::string err;
   EngineBuilder eb(std::move(Owner));
   eb.setErrorStr(&err);
@@ -103,12 +100,16 @@ int main() {
 	  outs() << "create error." << err;
 	  return -1;
   }
-   // Call the `foo' function with no arguments:
+
+  // Call the `foo' function with no arguments:
   std::vector<GenericValue> noargs;
   GenericValue gv = EE->runFunction(FooF, noargs);
 
   // Import result of execution:
   outs() << "Result: " << gv.IntVal << "\n";
+
+  M->print(outs(), nullptr);
+  outs().flush();
   
   delete EE;
   llvm_shutdown();
