@@ -12,4 +12,4 @@ llvm_map_components_to_libnames(llvm_libs support core irreader target execution
 target_link_libraries(dyn-emu ${llvm_libs})
 set_property(TARGET dyn-emu PROPERTY CXX_STANDARD 11)
 set_property(TARGET dyn-emu PROPERTY CXX_STANDARD_REQUIRED ON)
-add_definitions(-DYN_SHARED -DYN_LOG)
+
